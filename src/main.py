@@ -1,6 +1,6 @@
 #!usr/bin/env/python3
 
-import os, pathlib, rospy
+import os, sys, getopt, pathlib, rospy
 import numpy as np
 
 # from enviroment import MPO500_Env
@@ -187,15 +187,59 @@ class Program:
         # rm_pycache(f'{self.current_directory}/__pycache__')
         # rm_pycache(f'{self.current_directory}/DDPG/__pycache__')
         # rm_pycache(f'{self.current_directory}/MPO500/__pycache__')
-        
 
-if __name__ == "__main__":
-
-    # DDPG = Program('motion_planner_DDPG', env_name='NoObstacleNavigationMir100Sim-v0', is_training=True,  custom_testing=False, episodes_number=100)
-    # DDPG = Program('motion_planner_DDPG', env_name='NoObstacleNavigationMir100Sim-v0', is_training=False, custom_testing=False, episodes_number=100)
-    # DDPG = Program('motion_planner_DDPG', env_name='NoObstacleNavigationMir100Sim-v0', is_training=False,  custom_testing=True, episodes_number=100)
+# Get Arguments
+def getargv(argv):
     
-    DDPG = Program('motion_planner_DDPG', env_name='TrajectoryNavigationMir100Sim-v0', is_training=True,  custom_testing=False, episodes_number=100)
+    enviroment_name = 'TrajectoryNavigationMir100Sim-v0'
+    is_training = True
+    custom_testing = False
+    episodes_number = 100
+    help = "\n{0} -env <enviroment_name> -it <is_training> -ct <custom_testing -num <episodes_number>\n".format(argv[0])
+    
+    try:
+        opts, args = getopt.getopt(argv[1:], "h:env:it:ct:num:", ["help", "enviroment_name=", "is_training=", "custom_testing=", "episodes_number"])
+    except:
+        print(help)
+        sys.exit(2)
+    
+    for opt, arg in opts:
+        if opt in ("-h", "--help"):
+            print(help)  # print the help message
+            sys.exit(2)
+        elif opt in ("-env", "--enviroment_name"):
+            enviroment_name = arg
+        elif opt in ("-it", "--is_training"):
+            is_training = arg
+        elif opt in ("-ct", "--custom_testing"):
+            custom_testing = arg
+        elif opt in ("-num", "--episodes_number"):
+            episodes_number = arg
+            
+    print(f'\nEnviroment Name: {enviroment_name} \
+            \nTraining: {is_training} \
+            \nCustom Testing: {custom_testing} \
+            \nEpisodes Number: {episodes_number}\n')
+
+    # Check Enviroment Name    
+    if not enviroment_name in ['TrajectoryNavigationMir100Sim-v0', 'NoObstacleNavigationMir100Sim-v0']:
+        print(f'Enviroment "{enviroment_name}" Unavailable | Exit...')
+        exit()
+        
+    return enviroment_name, is_training, custom_testing, episodes_number
+        
+if __name__ == "__main__":
+    
+    # Get Arguments
+    enviroment_name, is_training, custom_testing, episodes_number = getargv(sys.argv)
+    
+    # DDPG = Program('motion_planner_DDPG', NoObstacleNavigationMir100Sim-v0, is_training=True,  custom_testing=False, episodes_number=100)
+    # DDPG = Program('motion_planner_DDPG', NoObstacleNavigationMir100Sim-v0, is_training=False, custom_testing=False, episodes_number=100)
+    # DDPG = Program('motion_planner_DDPG', NoObstacleNavigationMir100Sim-v0, is_training=False,  custom_testing=True, episodes_number=100)
+    
+    # DDPG = Program('motion_planner_DDPG', TrajectoryNavigationMir100Sim-v0, is_training=True,  custom_testing=False, episodes_number=100)
+    
+    DDPG = Program('motion_planner_DDPG', enviroment_name, is_training,  custom_testing, episodes_number)
 
     # Train Model
     if DDPG.is_training: DDPG.train()
