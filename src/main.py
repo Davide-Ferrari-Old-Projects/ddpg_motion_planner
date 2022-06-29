@@ -1,13 +1,5 @@
 #!usr/bin/env/python3
 
-''' 
-action space = parametri che modulano la traiettoria
-ottengo traiettoria da eq foglio e la passo a un io-sfl planner
-misuro il tempo (la lunghezza sarà sempre uguale)
-reward 1/len (traj)
-reward tempo
-'''
-
 import os, pathlib, rospy
 import numpy as np
 
@@ -21,7 +13,7 @@ from robo_gym.wrappers.exception_handling import ExceptionHandling
 
 class Program:
 
-    def __init__(self, name='motion_planner_DDPG', is_training=False, custom_testing=False, episodes_number=250):
+    def __init__(self, name='motion_planner_DDPG', env_name='NoObstacleNavigationMir100Sim-v0', is_training=False, custom_testing=False, episodes_number=250):
 
         # Load Rospy Parameters
         self.is_training = is_training
@@ -41,7 +33,7 @@ class Program:
 
         # initialize environment
         print('\nStarting Enviroment\n')
-        self.env_name = 'NoObstacleNavigationMir100Sim-v0'
+        self.env_name = env_name
         self.env = gym.make(self.env_name, ip=target_machine_ip, gui=True)
         self.env = ExceptionHandling(self.env)
         # self.env = gym.make('Pendulum-v1')
@@ -80,7 +72,6 @@ class Program:
         
                 # Increment Score
                 score += reward
-
        
                 # Remember the Episode
                 self.agent.remember(observation, action, reward, new_observation, done)
@@ -200,9 +191,11 @@ class Program:
 
 if __name__ == "__main__":
 
-    DDPG = Program('motion_planner_DDPG', is_training=True, custom_testing=False, episodes_number=100)
-    # DDPG = Program('motion_planner_DDPG', is_training=False, custom_testing=False, episodes_number=100)
-    # DDPG = Program('motion_planner_DDPG', is_training=False, custom_testing=True, episodes_number=100)
+    # DDPG = Program('motion_planner_DDPG', env_name='NoObstacleNavigationMir100Sim-v0', is_training=True,  custom_testing=False, episodes_number=100)
+    # DDPG = Program('motion_planner_DDPG', env_name='NoObstacleNavigationMir100Sim-v0', is_training=False, custom_testing=False, episodes_number=100)
+    # DDPG = Program('motion_planner_DDPG', env_name='NoObstacleNavigationMir100Sim-v0', is_training=False,  custom_testing=True, episodes_number=100)
+    
+    DDPG = Program('motion_planner_DDPG', env_name='TrajectoryNavigationMir100Sim-v0', is_training=True,  custom_testing=False, episodes_number=100)
 
     # Train Model
     if DDPG.is_training: DDPG.train()
