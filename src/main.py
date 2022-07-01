@@ -1,12 +1,12 @@
 #!usr/bin/env/python3
 
-import os, sys, getopt, pathlib, rospy
+import os, pathlib, rospy
 import numpy as np
 
 # from enviroment import MPO500_Env
 from DDPG.agent import Agent
 from DDPG.utils import plot_learning_curve
-# from utils import remove_pycache as rm_pycache
+from utils import remove_pycache as rm_pycache
 
 import gym, robo_gym
 from robo_gym.wrappers.exception_handling import ExceptionHandling
@@ -181,57 +181,43 @@ class Program:
         self.agent.load_models()
         
 
-    # def remove_pycache(self):
+    def remove_pycache(self):
         
-        # # Remove __pycache__
-        # rm_pycache(f'{self.current_directory}/__pycache__')
-        # rm_pycache(f'{self.current_directory}/DDPG/__pycache__')
-        # rm_pycache(f'{self.current_directory}/MPO500/__pycache__')
+        # Remove __pycache__
+        rm_pycache(f'{self.current_directory}/__pycache__')
+        rm_pycache(f'{self.current_directory}/DDPG/__pycache__')
+        rm_pycache(f'{self.current_directory}/MPO500/__pycache__')
 
 # Get Arguments
-def getargv(argv):
+def get_args():
     
-    enviroment_name = 'TrajectoryNavigationMir100Sim-v0'
-    is_training = True
-    custom_testing = False
-    episodes_number = 100
-    help = "\n{0} --env <enviroment_name> --it <is_training> --ct <custom_testing --num <episodes_number>\n".format(argv[0])
+    import argparse
+
+    parser = argparse.ArgumentParser(
+        prog='main',
+        description='DDPG Main Node')
+    parser.add_argument('-env', '--enviroment_name', type=str,  dest='enviroment_name', default='TrajectoryNavigationMir100Sim-v0', help='Enviroment Name')
+    parser.add_argument('-it',  '--is_training',     type=bool, dest='is_training',     default=True,  help='Boolean to switch from Training to Testing')
+    parser.add_argument('-ct',  '--custom_testing',  type=bool, dest='custom_testing',  default=False, help='Boolean to Enable Custom Testing')
+    parser.add_argument('-num', '--episodes_number', type=int,  dest='episodes_number', default=100,   help='Number of Episodes')
+    args = parser.parse_args()
     
-    try:
-        opts, args = getopt.getopt(argv[1:], "h:env:it:ct:num:", ["help", "enviroment_name=", "is_training=", "custom_testing=", "episodes_number"])
-    except:
-        print(help)
-        sys.exit(2)
-    
-    for opt, arg in opts:
-        if opt in ("-h", "--help"):
-            print(help)  # print the help message
-            sys.exit(2)
-        elif opt in ("--env", "--enviroment_name"):
-            enviroment_name = arg
-        elif opt in ("--it", "--is_training"):
-            is_training = arg
-        elif opt in ("--ct", "--custom_testing"):
-            custom_testing = arg
-        elif opt in ("--num", "--episodes_number"):
-            episodes_number = arg
-            
-    print(f'\nEnviroment Name: {enviroment_name} \
-            \nTraining: {is_training} \
-            \nCustom Testing: {custom_testing} \
-            \nEpisodes Number: {episodes_number}\n')
+    print(f'\nEnviroment Name: {args.enviroment_name} \
+            \nTraining: {args.is_training} \
+            \nCustom Testing: {args.custom_testing} \
+            \nEpisodes Number: {args.episodes_number}\n')
 
     # Check Enviroment Name    
-    if not enviroment_name in ['TrajectoryNavigationMir100Sim-v0', 'NoObstacleNavigationMir100Sim-v0']:
-        print(f'Enviroment "{enviroment_name}" Unavailable | Exit...')
+    if not args.enviroment_name in ['TrajectoryNavigationMir100Sim-v0', 'NoObstacleNavigationMir100Sim-v0']:
+        print(f'Enviroment "{args.enviroment_name}" Unavailable | Exit...')
         exit()
-        
-    return enviroment_name, is_training, custom_testing, episodes_number
-        
+    
+    return args.enviroment_name, args.is_training, args.custom_testing, args.episodes_number
+
 if __name__ == "__main__":
     
     # Get Arguments
-    enviroment_name, is_training, custom_testing, episodes_number = getargv(sys.argv)
+    enviroment_name, is_training, custom_testing, episodes_number = get_args()
     
     # DDPG = Program('motion_planner_DDPG', NoObstacleNavigationMir100Sim-v0, is_training=True,  custom_testing=False, episodes_number=100)
     # DDPG = Program('motion_planner_DDPG', NoObstacleNavigationMir100Sim-v0, is_training=False, custom_testing=False, episodes_number=100)
