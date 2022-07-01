@@ -195,7 +195,7 @@ def getargv(argv):
     is_training = True
     custom_testing = False
     episodes_number = 100
-    help = "\n{0} -env <enviroment_name> -it <is_training> -ct <custom_testing -num <episodes_number>\n".format(argv[0])
+    help = "\n{0} --env <enviroment_name> --it <is_training> --ct <custom_testing --num <episodes_number>\n".format(argv[0])
     
     try:
         opts, args = getopt.getopt(argv[1:], "h:env:it:ct:num:", ["help", "enviroment_name=", "is_training=", "custom_testing=", "episodes_number"])
@@ -207,13 +207,13 @@ def getargv(argv):
         if opt in ("-h", "--help"):
             print(help)  # print the help message
             sys.exit(2)
-        elif opt in ("-env", "--enviroment_name"):
+        elif opt in ("--env", "--enviroment_name"):
             enviroment_name = arg
-        elif opt in ("-it", "--is_training"):
+        elif opt in ("--it", "--is_training"):
             is_training = arg
-        elif opt in ("-ct", "--custom_testing"):
+        elif opt in ("--ct", "--custom_testing"):
             custom_testing = arg
-        elif opt in ("-num", "--episodes_number"):
+        elif opt in ("--num", "--episodes_number"):
             episodes_number = arg
             
     print(f'\nEnviroment Name: {enviroment_name} \
