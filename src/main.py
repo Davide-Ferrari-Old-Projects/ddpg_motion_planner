@@ -3,6 +3,10 @@
 import os, pathlib, rospy
 import numpy as np
 
+# Get Arguments
+from utils import get_arguments as get_args
+enviroment_name, is_training, custom_testing, episodes_number = get_args()
+
 # from enviroment import MPO500_Env
 from DDPG.agent import Agent
 from DDPG.utils import plot_learning_curve
@@ -188,36 +192,7 @@ class Program:
         rm_pycache(f'{self.current_directory}/DDPG/__pycache__')
         rm_pycache(f'{self.current_directory}/MPO500/__pycache__')
 
-# Get Arguments
-def get_args():
-    
-    import argparse
-
-    parser = argparse.ArgumentParser(
-        prog='main',
-        description='DDPG Main Node')
-    parser.add_argument('-env', '--enviroment_name', type=str,  dest='enviroment_name', default='TrajectoryNavigationMir100Sim-v0', help='Enviroment Name')
-    parser.add_argument('-it',  '--is_training',     type=bool, dest='is_training',     default=True,  help='Boolean to switch from Training to Testing')
-    parser.add_argument('-ct',  '--custom_testing',  type=bool, dest='custom_testing',  default=False, help='Boolean to Enable Custom Testing')
-    parser.add_argument('-num', '--episodes_number', type=int,  dest='episodes_number', default=100,   help='Number of Episodes')
-    args = parser.parse_args()
-    
-    print(f'\nEnviroment Name: {args.enviroment_name} \
-            \nTraining: {args.is_training} \
-            \nCustom Testing: {args.custom_testing} \
-            \nEpisodes Number: {args.episodes_number}\n')
-
-    # Check Enviroment Name    
-    if not args.enviroment_name in ['TrajectoryNavigationMir100Sim-v0', 'NoObstacleNavigationMir100Sim-v0']:
-        print(f'Enviroment "{args.enviroment_name}" Unavailable | Exit...')
-        exit()
-    
-    return args.enviroment_name, args.is_training, args.custom_testing, args.episodes_number
-
 if __name__ == "__main__":
-    
-    # Get Arguments
-    enviroment_name, is_training, custom_testing, episodes_number = get_args()
     
     # DDPG = Program('motion_planner_DDPG', NoObstacleNavigationMir100Sim-v0, is_training=True,  custom_testing=False, episodes_number=100)
     # DDPG = Program('motion_planner_DDPG', NoObstacleNavigationMir100Sim-v0, is_training=False, custom_testing=False, episodes_number=100)
@@ -228,7 +203,11 @@ if __name__ == "__main__":
     DDPG = Program('motion_planner_DDPG', enviroment_name, is_training,  custom_testing, episodes_number)
 
     # Train Model
-    if DDPG.is_training: DDPG.train()
+    if DDPG.is_training: 
+        
+        DDPG.train()
+        # try: DDPG.train()
+        # except: pass
 
     # Rndom Testing Model
     elif not DDPG.custom_testing: DDPG.random_testing()
@@ -243,6 +222,6 @@ if __name__ == "__main__":
         target_pose = [10.0, -5.0, 0.0]
         
         DDPG.Mir100_testing(starting_pose, target_pose)
-
+        
     # Remove __pycache__
     DDPG.remove_pycache()
