@@ -5,7 +5,7 @@ import numpy as np
 
 # Get Arguments
 from utils import get_arguments as get_args
-enviroment_name, is_training, custom_testing, episodes_number = get_args()
+enviroment_name, is_training, episodes_number = get_args()
 
 # from enviroment import MPO500_Env
 from DDPG.agent import Agent
@@ -17,11 +17,10 @@ from robo_gym.wrappers.exception_handling import ExceptionHandling
 
 class Program:
 
-    def __init__(self, name='motion_planner_DDPG', env_name='NoObstacleNavigationMir100Sim-v0', is_training=False, custom_testing=False, episodes_number=250):
+    def __init__(self, name='motion_planner_DDPG', env_name='NoObstacleNavigationMir100Sim-v0', is_training=False, episodes_number=250):
 
         # Load Rospy Parameters
         self.is_training = is_training
-        self.custom_testing = custom_testing
         self.n_episodes = episodes_number
 
         # Get Current Directory
@@ -107,7 +106,6 @@ class Program:
 
         # Plot the Training Graph
         plot_learning_curve(x, self.score_history, self.figure_file)
-    
         
     def random_testing(self):
         
@@ -137,33 +135,6 @@ class Program:
                 # Update the Observation
                 observation = new_observation
 
-        
-    # Custom Scenario Mir100Env
-    def Mir100_testing(self, starting_pose=[0.0,0.0,0.0], target_pose=[1.0,1.0,0.0]):
-        
-        # Load Agent Model
-        self.load_model()
-        
-        # Reset the Enviroment setting Custom Starting Pose and Target Pose
-        observation = self.env.reset(start_pose=starting_pose, target_pose=target_pose)
-        done = False
-
-        # Until the Episode is Not Done
-        while not done: # and not rospy.is_shutdown():
-
-            # Choose and Action
-            action = self.agent.choose_action(observation, evaluate=True)
-            
-            # Get Observation and Rewards from the Enviroment
-            new_observation, reward, done, info = self.env.step(action)
-
-            # Remember the Episode
-            self.agent.remember(observation, action, reward, new_observation, done)
-
-            # Update the Observation
-            observation = new_observation
-
-
     def load_model(self):
         
         n_steps = 0
@@ -183,7 +154,6 @@ class Program:
 
         # Load Models
         self.agent.load_models()
-        
 
     def remove_pycache(self):
         
@@ -194,13 +164,7 @@ class Program:
 
 if __name__ == "__main__":
     
-    # DDPG = Program('motion_planner_DDPG', NoObstacleNavigationMir100Sim-v0, is_training=True,  custom_testing=False, episodes_number=100)
-    # DDPG = Program('motion_planner_DDPG', NoObstacleNavigationMir100Sim-v0, is_training=False, custom_testing=False, episodes_number=100)
-    # DDPG = Program('motion_planner_DDPG', NoObstacleNavigationMir100Sim-v0, is_training=False,  custom_testing=True, episodes_number=100)
-    
-    # DDPG = Program('motion_planner_DDPG', TrajectoryNavigationMir100Sim-v0, is_training=True,  custom_testing=False, episodes_number=100)
-    
-    DDPG = Program('motion_planner_DDPG', enviroment_name, is_training,  custom_testing, episodes_number)
+    DDPG = Program('motion_planner_DDPG', enviroment_name, is_training, episodes_number)
 
     # Train Model
     if DDPG.is_training: 
@@ -210,18 +174,7 @@ if __name__ == "__main__":
         # except: pass
 
     # Rndom Testing Model
-    elif not DDPG.custom_testing: DDPG.random_testing()
-    
-    # Custom Testing Model
-    elif DDPG.custom_testing and DDPG.env_name == 'NoObstacleNavigationMir100Sim-v0': 
-        
-        # starting_pose = [x,y,yaw] | -2.0 < x,y < 2.0 | -pi < yaw < pi
-        starting_pose = [0.0, 0.0, 0.0]
-        
-        # target_pose   = [x,y,yaw] | -1.0 < x,y < 1.0 | yaw = 0.0
-        target_pose = [10.0, -5.0, 0.0]
-        
-        DDPG.Mir100_testing(starting_pose, target_pose)
-        
+    else: DDPG.random_testing()
+
     # Remove __pycache__
     DDPG.remove_pycache()
